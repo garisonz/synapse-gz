@@ -1,3 +1,21 @@
+"""
+app/api/upload.py — POST /api/upload route handler.
+
+Accepts a single file upload (CSV, XLSX, or XLS), validates it, parses it
+into a DataFrame via file_parser.py, then returns metadata and a preview.
+
+How it works:
+  1. Checks the file extension against ALLOWED_EXTENSIONS; rejects anything else
+     with a 400 error.
+  2. Reads the raw bytes and enforces the MAX_FILE_SIZE_MB limit (413 error if
+     exceeded).
+  3. Calls parse_file() to convert the bytes into a pandas DataFrame.
+  4. Calls get_column_info() to extract per-column name, dtype, and missing count.
+  5. Calls get_preview() to grab the first 5 rows as a list of dicts.
+  6. Calculates overall missing-value percentage.
+  7. Returns an UploadResponse containing all of the above plus summary Metrics
+     (rows, columns, missing %).
+"""
 from fastapi import APIRouter, UploadFile, File, HTTPException
 from app.schemas.upload import UploadResponse, Metric
 from app.services.file_parser import parse_file, get_column_info, get_preview

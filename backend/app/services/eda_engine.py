@@ -1,3 +1,38 @@
+"""
+app/services/eda_engine.py — Exploratory Data Analysis (EDA) business logic.
+
+Contains a single public function run_eda() that performs one or more analysis
+passes over a pandas DataFrame and returns an EDAResponse with a flat list of
+Metric objects and optional base64-encoded plot images.
+
+Analysis types (controlled by the `analyses` list passed in from the router):
+
+  "summary"      — Counts numeric vs. categorical columns and appends the mean
+                   for the first three numeric columns.
+
+  "missing"      — Finds columns with missing values and reports the top 3 by
+                   missing count. Reports "None" if the dataset is complete.
+
+  "distribution" — Plots histograms for up to the first 4 numeric columns using
+                   matplotlib (dark-themed). The figure is serialised to a
+                   base64 PNG via plot_utils.fig_to_base64() and added to the
+                   plots list.
+
+  "correlation"  — Computes a Pearson correlation matrix for all numeric columns
+                   and renders it as a seaborn heatmap (annotated when ≤10
+                   columns). Also reports the most strongly correlated pair as a
+                   Metric.
+
+  "outliers"     — Uses the IQR method (Q1 − 1.5×IQR, Q3 + 1.5×IQR) to count
+                   outliers per numeric column, then reports the total count and
+                   the column with the most outliers.
+
+  target_column  — If provided and valid, appends class count and most-common
+                   class metrics (useful for classification targets).
+
+matplotlib is set to the "Agg" non-interactive backend so plots can be rendered
+in a headless server environment without a display.
+"""
 import pandas as pd
 import matplotlib
 matplotlib.use("Agg")

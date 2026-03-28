@@ -1,3 +1,28 @@
+"""
+app/main.py — FastAPI application entry point.
+
+This is the top-level file that boots the entire backend. It:
+  1. Creates the FastAPI app instance with metadata (title, version).
+  2. Attaches CORS middleware using origins from config.py, so the Next.js
+     frontend (default: http://localhost:3000) is allowed to make cross-origin
+     requests.
+  3. Registers the four API routers, each mounted under the /api prefix:
+       POST /api/upload   → upload.py  (file validation + metadata)
+       POST /api/eda      → eda.py     (exploratory data analysis)
+       POST /api/features → features.py (feature engineering)
+       POST /api/train    → train.py   (single model training)
+       POST /api/compare  → train.py   (multi-model comparison)
+  4. Exposes a root GET / health-check endpoint.
+
+Request flow through the backend:
+    HTTP Request
+        → CORSMiddleware           (validates origin header)
+        → app/api/*.py             (router: reads form fields, validates input)
+        → app/services/file_parser (converts uploaded bytes → pandas DataFrame)
+        → app/services/*.py        (business logic: analysis, transforms, training)
+        → app/schemas/*.py         (Pydantic model serialises result → JSON response)
+"""
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.config import settings

@@ -1,3 +1,42 @@
+"""
+app/services/trainer.py — ML model training and comparison logic.
+
+Provides two public functions used by the /api/train and /api/compare routes.
+
+Supported models:
+  Classification: logistic_regression, random_forest, xgboost, svm, knn,
+                  neural_network
+  Regression:     random_forest, xgboost, svm, knn, neural_network
+
+Internal helper:
+  _prepare(df, target) → (X, y)
+      Separates features from the target column. Label-encodes any object
+      columns in X (so all inputs are numeric), then fills remaining NaNs
+      with column medians. Returns X (DataFrame) and y (Series).
+
+train_model(df, target, task_type, model_name, test_split) → TrainResponse
+  1. Calls _prepare() to get X and y.
+  2. For classification, label-encodes y.
+  3. Looks up the model class and its default hyperparameters from the
+     CLASSIFICATION_MODELS / REGRESSION_MODELS registries.
+  4. Splits data into train/test with the given test_split ratio.
+  5. Fits the model and generates predictions.
+  6. Computes and returns metrics:
+       Classification — Accuracy, F1 (weighted), AUC (binary tasks only),
+                        test sample count.
+       Regression     — RMSE, R², MAE, test sample count.
+
+compare_models(df, target, task_type, model_names, primary_metric)
+              → CompareResponse
+  1. Calls _prepare() and optionally label-encodes y.
+  2. Creates a single train/test split (20% test, random_state=42) shared
+     across all models so comparisons are fair.
+  3. Trains each model in model_names, scoring with accuracy (classification)
+     or R² (regression). Failed models score 0.0.
+  4. Identifies the best model by score and returns a CompareResponse with
+     the best model name, its score, total model count, and a per-model
+     breakdown.
+"""
 import pandas as pd
 import numpy as np
 from sklearn.model_selection import train_test_split

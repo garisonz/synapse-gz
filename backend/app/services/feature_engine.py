@@ -1,3 +1,36 @@
+"""
+app/services/feature_engine.py — Feature engineering / transformation logic.
+
+Contains a single public function apply_transform() that takes a DataFrame, a
+list of target columns, a transformation method, and an optional imputation
+strategy, then returns a FeatureResponse with column count metrics.
+
+How it works:
+  1. Imputation (optional, applied first):
+       "knn"    — sklearn KNNImputer (k=5) on numeric columns.
+       "mean"   — SimpleImputer with mean strategy.
+       "median" — SimpleImputer with median strategy.
+       "mode"   — SimpleImputer with most_frequent strategy.
+     Only numeric columns within the selected `columns` list are imputed.
+
+  2. Transformation (applied to the selected columns):
+       "onehot"     — pd.get_dummies() on categorical columns (nunique < 20 or
+                      dtype == object). Replaces original columns with dummies;
+                      tracks net new columns as `generated`.
+       "label"      — LabelEncoder per object column; in-place, no new columns.
+       "standard"   — StandardScaler: zero mean, unit variance on numeric cols.
+       "minmax"     — MinMaxScaler: scales values to [0, 1].
+       "robust"     — RobustScaler: uses median/IQR, outlier-resistant.
+       "log"        — Adds a {col}_log column (log1p of clipped-to-0 values).
+       "sqrt"       — Adds a {col}_sqrt column (sqrt of clipped-to-0 values).
+       "polynomial" — PolynomialFeatures(degree=2): adds interaction and squared
+                      terms for numeric columns; new columns appended in-place.
+
+  3. Returns FeatureResponse with three Metrics:
+       Original  — column count before transformation
+       Generated — net new columns added (relevant for onehot/log/sqrt/poly)
+       Total     — final column count after transformation
+"""
 import pandas as pd
 import numpy as np
 from sklearn.preprocessing import (
