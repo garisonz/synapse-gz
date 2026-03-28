@@ -262,7 +262,7 @@ synapse-gz/
 
 ## Roadmap
  
-- [ ] Project scaffolding (Next.js + FastAPI)
+- [ ] Project setup and scaffolding (Next.js + FastAPI)
 - [ ] CSV/Excel upload and preview
 - [ ] Auto EDA report generation
 - [ ] Feature engineering pipeline UI
