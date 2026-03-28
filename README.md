@@ -148,14 +148,117 @@ curl -X POST http://localhost:8000/api/train \
 
 
 ## Project Structure
-
-+ synapse-gz
-  + backend
-    + api
-      + __init__.py
-      + main.py (FastAPI)
-    + requirements.txt (Required Python Packages)
-  + frontend
+ 
+```
+synapse-gz/
+├── backend/                          # FastAPI server (Python)
+│   ├── app/
+│   │   ├── __init__.py
+│   │   ├── main.py                   # FastAPI app entry point
+│   │   ├── config.py                 # Settings via pydantic-settings (env vars)
+│   │   │
+│   │   ├── api/                      # Route layer — thin handlers, no business logic
+│   │   │   ├── __init__.py
+│   │   │   ├── upload.py             # POST /api/upload — file validation & parsing
+│   │   │   ├── eda.py                # GET  /api/eda/{id} — trigger EDA report
+│   │   │   ├── features.py           # POST /api/features — apply transforms
+│   │   │   ├── train.py              # POST /api/train — launch model training
+│   │   │   └── models.py             # GET  /api/models/{id} — retrieve results
+│   │   │
+│   │   ├── services/                 # Core business logic
+│   │   │   ├── __init__.py
+│   │   │   ├── file_parser.py        # CSV/Excel ingestion, dtype detection
+│   │   │   ├── eda_engine.py         # Distributions, correlations, missing data
+│   │   │   ├── feature_engine.py     # Encoding, scaling, transforms, imputation
+│   │   │   ├── trainer.py            # sklearn model fitting, cross-validation
+│   │   │   └── model_registry.py     # Store & retrieve trained model artifacts
+│   │   │
+│   │   ├── schemas/                  # Pydantic request/response models
+│   │   │   ├── __init__.py
+│   │   │   ├── upload.py             # UploadResponse, DatasetPreview
+│   │   │   ├── eda.py                # EDAReport, ColumnStats, CorrelationMatrix
+│   │   │   ├── features.py           # TransformRequest, PipelineStep
+│   │   │   └── train.py              # TrainRequest, TrainResult, ModelMetrics
+│   │   │
+│   │   └── utils/                    # Shared helpers
+│   │       ├── __init__.py
+│   │       ├── file_utils.py         # Temp file handling, cleanup
+│   │       └── plot_utils.py         # Chart generation (Matplotlib/Seaborn → base64)
+│   │
+│   ├── tests/                        # Pytest test suite
+│   │   ├── conftest.py               # Shared fixtures (test client, sample datasets)
+│   │   ├── test_upload.py
+│   │   ├── test_eda.py
+│   │   ├── test_features.py
+│   │   └── test_train.py
+│   │
+│   ├── data/                         # Gitignored — uploaded files & temp artifacts
+│   │   └── .gitkeep
+│   │
+│   ├── requirements.txt              # Pinned Python dependencies
+│   ├── Dockerfile                    # Backend container image
+│   └── .env.example                  # Template for backend env vars
+│
+├── frontend/                         # Next.js 15 app (TypeScript)
+│   ├── public/
+│   │   └── favicon.ico
+│   │
+│   ├── src/
+│   │   ├── app/                      # Next.js App Router
+│   │   │   ├── layout.tsx            # Root layout — providers, global styles
+│   │   │   ├── page.tsx              # Landing / upload page
+│   │   │   ├── eda/
+│   │   │   │   └── page.tsx          # EDA dashboard view
+│   │   │   ├── features/
+│   │   │   │   └── page.tsx          # Feature engineering pipeline UI
+│   │   │   ├── train/
+│   │   │   │   └── page.tsx          # Model selection & training view
+│   │   │   └── compare/
+│   │   │       └── page.tsx          # Model comparison dashboard
+│   │   │
+│   │   ├── components/               # Reusable React components
+│   │   │   ├── ui/                   # shadcn/ui primitives (button, card, dialog…)
+│   │   │   ├── upload-dropzone.tsx   # Drag-and-drop file upload zone
+│   │   │   ├── data-preview.tsx      # Sortable/filterable data table
+│   │   │   ├── eda-charts.tsx        # Distribution plots, correlation heatmap
+│   │   │   ├── feature-pipeline.tsx  # Visual transform builder
+│   │   │   ├── model-card.tsx        # Single model config + results card
+│   │   │   ├── metrics-chart.tsx     # Bar/radar chart for model comparison
+│   │   │   └── confusion-matrix.tsx  # Interactive confusion matrix display
+│   │   │
+│   │   ├── lib/                      # Utilities & API layer
+│   │   │   ├── api.ts                # Axios/fetch wrapper — all backend calls
+│   │   │   ├── utils.ts              # General helpers (cn, formatters)
+│   │   │   └── constants.ts          # Model options, default hyperparams, colors
+│   │   │
+│   │   ├── hooks/                    # Custom React hooks
+│   │   │   ├── use-dataset.ts        # Dataset state & upload logic
+│   │   │   ├── use-eda.ts            # Fetch & cache EDA results
+│   │   │   └── use-training.ts       # Training status, polling, results
+│   │   │
+│   │   └── types/                    # Shared TypeScript interfaces
+│   │       ├── dataset.ts            # Dataset, Column, Preview types
+│   │       ├── eda.ts                # EDAReport, ColumnStats types
+│   │       └── model.ts              # TrainConfig, ModelResult, Metrics types
+│   │
+│   ├── tailwind.config.ts            # Tailwind + shadcn/ui theme
+│   ├── tsconfig.json
+│   ├── next.config.ts
+│   ├── package.json
+│   ├── Dockerfile                    # Frontend container image
+│   └── .env.example                  # Template for frontend env vars
+│
+├── docs/                             # Documentation & assets
+│   └── assets/
+│       ├── synapse-logo.png          # Project logo
+│       ├── synapse-demo.gif          # Hero demo GIF for README
+│       └── architecture.png          # Architecture diagram (optional export)
+│
+│
+├── docker-compose.yml                # Full-stack local dev with one command
+├── .gitignore
+└── README.md                      
+```
 
 ## Roadmap
  
