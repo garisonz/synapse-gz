@@ -1,1 +1,11 @@
 fastapi[standard]
+uvicorn[standard]
+python-multipart
+pandas
+openpyxl
+numpy
+scikit-learn
+xgboost
+matplotlib
+seaborn
+pydantic-settings

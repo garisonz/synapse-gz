@@ -1,5 +1,7 @@
 export default function Main() {
     return (
-        <p>Dashboard</p>
+        <div className="p-4">
+            <p>Dashboard</p>
+        </div>
     )
 }

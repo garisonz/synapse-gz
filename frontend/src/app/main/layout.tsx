@@ -10,7 +10,7 @@ import {
 
 export default function MainLayout({ children }: { children: React.ReactNode }) {
     return (
-        <div className="min-h-screen flex flex-col">
+        <div className="h-screen flex flex-col">
             <header className="border-b px-4 py-2">
                 <NavigationMenu>
                     <NavigationMenuList>
@@ -21,7 +21,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
                         </NavigationMenuItem>
                         <NavigationMenuItem>
                             <NavigationMenuLink asChild className={navigationMenuTriggerStyle()}>
-                                <Link href="/main/tools">Tools</Link>
+                                <Link href="/main/toolbox">Tools</Link>
                             </NavigationMenuLink>
                         </NavigationMenuItem>
                         <NavigationMenuItem>
@@ -32,7 +32,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
                     </NavigationMenuList>
                 </NavigationMenu>
             </header>
-            <main className="flex-1 p-4">
+            <main className="flex-1 flex flex-col overflow-hidden">
                 {children}
             </main>
         </div>
