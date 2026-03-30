@@ -9,3 +9,9 @@ xgboost
 matplotlib
 seaborn
 pydantic-settings
+sqlalchemy[asyncio]>=2.0
+asyncpg
+alembic
+bcrypt
+python-jose[cryptography]
+aiofiles

@@ -9,15 +9,17 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Checkbox } from "@/components/ui/checkbox"
-import { ScrollArea } from "@/components/ui/scroll-area"
 import type { EdaConfig } from "@/hooks/useToolboxState"
 
-const ANALYSES = [
-  "Distribution",
-  "Correlation",
-  "Missing Values",
-  "Outlier Detection",
-  "Summary Statistics",
+const ANALYSES: { label: string; visual: boolean }[] = [
+  { label: "Summary Statistics", visual: false },
+  { label: "Missing Values", visual: false },
+  { label: "Outlier Detection", visual: false },
+  { label: "Distribution", visual: true },
+  { label: "Correlation", visual: true },
+  { label: "Box Plot", visual: true },
+  { label: "Scatter Matrix", visual: true },
+  { label: "Bar Chart", visual: true },
 ]
 
 interface EdaConfigProps {
@@ -27,12 +29,15 @@ interface EdaConfigProps {
 }
 
 export function EdaConfig({ columns, value, onChange }: EdaConfigProps) {
-  const toggle = (analysis: string) => {
-    const analyses = value.analyses.includes(analysis)
-      ? value.analyses.filter((a) => a !== analysis)
-      : [...value.analyses, analysis]
+  const toggle = (label: string) => {
+    const analyses = value.analyses.includes(label)
+      ? value.analyses.filter((a) => a !== label)
+      : [...value.analyses, label]
     onChange({ ...value, analyses })
   }
+
+  const metrics = ANALYSES.filter((a) => !a.visual)
+  const visuals = ANALYSES.filter((a) => a.visual)
 
   return (
     <div className="flex flex-col gap-4">
@@ -71,49 +76,84 @@ export function EdaConfig({ columns, value, onChange }: EdaConfigProps) {
         </Select>
       </div>
 
-      <div className="flex flex-col gap-1.5">
-        <Label
-          style={{
-            color: "var(--text-secondary)",
-            fontSize: "11px",
-            textTransform: "uppercase",
-            letterSpacing: "0.05em",
-          }}
-        >
-          Analyses
-        </Label>
-        <ScrollArea
-          className="max-h-40 rounded-md border"
-          style={{ borderColor: "var(--border)" }}
-        >
-          <div className="p-2 flex flex-col gap-0.5">
-            {ANALYSES.map((analysis) => {
-              const isChecked = value.analyses.includes(analysis)
+      <div className="flex flex-col gap-3">
+        {/* Metrics */}
+        <div className="flex flex-col gap-1.5">
+          <Label
+            style={{
+              color: "var(--text-secondary)",
+              fontSize: "11px",
+              textTransform: "uppercase",
+              letterSpacing: "0.05em",
+            }}
+          >
+            Metrics
+          </Label>
+          <div
+            className="rounded-md border p-2 flex flex-col gap-0.5"
+            style={{ borderColor: "var(--border)" }}
+          >
+            {metrics.map(({ label }) => {
+              const isChecked = value.analyses.includes(label)
               return (
                 <div
-                  key={analysis}
+                  key={label}
                   className="flex items-center gap-2 px-2 py-1.5 rounded cursor-pointer transition-colors"
-                  style={{
-                    background: isChecked ? "var(--surface-active)" : "transparent",
-                  }}
-                  onClick={() => toggle(analysis)}
+                  style={{ background: isChecked ? "var(--surface-active)" : "transparent" }}
+                  onClick={() => toggle(label)}
                 >
                   <Checkbox
                     checked={isChecked}
-                    onCheckedChange={() => toggle(analysis)}
+                    onCheckedChange={() => toggle(label)}
                     onClick={(e) => e.stopPropagation()}
                   />
-                  <span
-                    className="text-sm select-none"
-                    style={{ color: "var(--text-primary)" }}
-                  >
-                    {analysis}
+                  <span className="text-sm select-none" style={{ color: "var(--text-primary)" }}>
+                    {label}
                   </span>
                 </div>
               )
             })}
           </div>
-        </ScrollArea>
+        </div>
+
+        {/* Visuals */}
+        <div className="flex flex-col gap-1.5">
+          <Label
+            style={{
+              color: "var(--text-secondary)",
+              fontSize: "11px",
+              textTransform: "uppercase",
+              letterSpacing: "0.05em",
+            }}
+          >
+            Visuals
+          </Label>
+          <div
+            className="rounded-md border p-2 flex flex-col gap-0.5"
+            style={{ borderColor: "var(--border)" }}
+          >
+            {visuals.map(({ label }) => {
+              const isChecked = value.analyses.includes(label)
+              return (
+                <div
+                  key={label}
+                  className="flex items-center gap-2 px-2 py-1.5 rounded cursor-pointer transition-colors"
+                  style={{ background: isChecked ? "var(--surface-active)" : "transparent" }}
+                  onClick={() => toggle(label)}
+                >
+                  <Checkbox
+                    checked={isChecked}
+                    onCheckedChange={() => toggle(label)}
+                    onClick={(e) => e.stopPropagation()}
+                  />
+                  <span className="text-sm select-none" style={{ color: "var(--text-primary)" }}>
+                    {label}
+                  </span>
+                </div>
+              )
+            })}
+          </div>
+        </div>
       </div>
     </div>
   )

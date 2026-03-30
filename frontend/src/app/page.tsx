@@ -41,18 +41,19 @@ export default function Home() {
             {/* Left: headline + CTAs */}
             <div className="flex-1 space-y-7 text-left">
               <Badge variant="outline" className="text-xs font-medium tracking-widest uppercase px-3 py-1">
-                Open Source ML Platform
+                Data Science Tooling & Research Platform
               </Badge>
               <h1 className="text-6xl font-bold tracking-tight leading-tight">
                 Synapse-Gz
               </h1>
               <p className="text-xl text-muted-foreground leading-relaxed">
-                The end-to-end machine learning workspace. Import data, explore
-                patterns, engineer features, and compare models — all in one place.
+                All-in-one intelligence platform designed to bridge the gap between theoretical research and automated execution. 
+                By centralizing the data science lifecycle into a single, intuitive interface, it empowers researchers and analysts to 
+                move from raw data discovery to comparative model insights without switching environments.
               </p>
               <div className="flex items-center gap-3">
                 <Button asChild size="lg" className="gap-2">
-                  <a href="/main">
+                  <a href="/login">
                     Get Started
                     <ArrowRight className="w-4 h-4" />
                   </a>

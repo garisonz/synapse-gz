@@ -41,6 +41,9 @@ const ANALYSIS_KEY: Record<string, string> = {
   "Missing Values": "missing",
   "Outlier Detection": "outliers",
   "Summary Statistics": "summary",
+  "Box Plot": "box_plot",
+  "Scatter Matrix": "scatter",
+  "Bar Chart": "bar_chart",
 }
 
 const MODEL_KEY: Record<string, string> = {

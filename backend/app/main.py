@@ -26,6 +26,7 @@ Request flow through the backend:
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.config import settings
+from app.api.auth import router as auth_router
 from app.api.upload import router as upload_router
 from app.api.eda import router as eda_router
 from app.api.features import router as features_router
@@ -41,6 +42,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+app.include_router(auth_router, prefix="/api")
 app.include_router(upload_router, prefix="/api")
 app.include_router(eda_router, prefix="/api")
 app.include_router(features_router, prefix="/api")

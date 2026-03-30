@@ -1,7 +1,6 @@
 "use client"
 
 import { useEffect, useRef } from "react"
-import { ScrollArea } from "@/components/ui/scroll-area"
 import { FileDropZone } from "./FileDropZone"
 import { CsvPreview } from "./CsvPreview"
 import { NotebookCell } from "./NotebookCell"
@@ -46,7 +45,7 @@ export function NotebookPanel({
   const rowCount = Math.max(0, parsedRows.length - 1)
 
   return (
-    <ScrollArea className="flex-1 h-full">
+    <div className="flex-1 h-full overflow-y-auto overflow-x-hidden">
       <div className="p-5 flex flex-col gap-4">
         {/* Data cell */}
         <div
@@ -137,6 +136,6 @@ export function NotebookPanel({
 
         <div ref={bottomRef} />
       </div>
-    </ScrollArea>
+    </div>
   )
 }

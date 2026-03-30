@@ -133,6 +133,84 @@ def run_eda(
         top_col = max(outlier_counts, key=lambda c: outlier_counts[c])
         metrics.append(Metric(label=f"Outliers: {top_col}", value=outlier_counts[top_col]))
 
+    if "box_plot" in analyses and numeric_cols:
+        cols_to_plot = numeric_cols[:6]
+        n = len(cols_to_plot)
+        fig, axes = plt.subplots(1, n, figsize=(max(4 * n, 6), 4))
+        if n == 1:
+            axes = [axes]
+        for ax, col in zip(axes, cols_to_plot):
+            data = df[col].dropna()
+            bp = ax.boxplot(data, patch_artist=True, widths=0.5,
+                            medianprops=dict(color="#34d399", linewidth=2),
+                            boxprops=dict(facecolor="#1f2937", edgecolor="#4b5563"),
+                            whiskerprops=dict(color="#6b7280"),
+                            capprops=dict(color="#6b7280"),
+                            flierprops=dict(marker="o", color="#f87171", markersize=3, alpha=0.6))
+            ax.set_title(col, fontsize=9)
+            ax.set_xticks([])
+            ax.tick_params(labelsize=7)
+        fig.patch.set_facecolor("#0d1117")
+        for ax in axes:
+            ax.set_facecolor("#161b22")
+            ax.tick_params(colors="#8b949e")
+            ax.title.set_color("#e6edf3")
+            for spine in ax.spines.values():
+                spine.set_edgecolor("#30363d")
+        plt.tight_layout()
+        plots.append(fig_to_base64(fig))
+
+    if "scatter" in analyses and len(numeric_cols) >= 2:
+        cols_to_plot = numeric_cols[:4]
+        n = len(cols_to_plot)
+        sample = df[cols_to_plot].dropna().sample(min(500, len(df)), random_state=42)
+        fig, axes = plt.subplots(n, n, figsize=(2.5 * n, 2.5 * n))
+        for i in range(n):
+            for j in range(n):
+                ax = axes[i][j] if n > 1 else axes
+                if i == j:
+                    sample[cols_to_plot[i]].hist(ax=ax, bins=20, color="#818cf8", edgecolor="none")
+                else:
+                    ax.scatter(sample[cols_to_plot[j]], sample[cols_to_plot[i]],
+                               s=6, alpha=0.5, color="#34d399", linewidths=0)
+                ax.set_facecolor("#161b22")
+                ax.tick_params(colors="#8b949e", labelsize=6)
+                for spine in ax.spines.values():
+                    spine.set_edgecolor("#30363d")
+                if i == n - 1:
+                    ax.set_xlabel(cols_to_plot[j], fontsize=7, color="#8b949e")
+                if j == 0:
+                    ax.set_ylabel(cols_to_plot[i], fontsize=7, color="#8b949e")
+        fig.patch.set_facecolor("#0d1117")
+        plt.tight_layout()
+        plots.append(fig_to_base64(fig))
+
+    if "bar_chart" in analyses:
+        cat_cols = df.select_dtypes(include=["object", "category"]).columns.tolist()
+        cat_cols = [c for c in cat_cols if df[c].nunique() <= 30][:4]
+        if cat_cols:
+            n = len(cat_cols)
+            fig, axes = plt.subplots(1, n, figsize=(4 * n, 3))
+            if n == 1:
+                axes = [axes]
+            for ax, col in zip(axes, cat_cols):
+                counts = df[col].value_counts().head(10)
+                bars = ax.barh(range(len(counts)), counts.values, color="#818cf8", edgecolor="none")
+                ax.set_yticks(range(len(counts)))
+                ax.set_yticklabels(counts.index.astype(str), fontsize=7)
+                ax.set_title(col, fontsize=9)
+                ax.tick_params(labelsize=7)
+                ax.invert_yaxis()
+            fig.patch.set_facecolor("#0d1117")
+            for ax in axes:
+                ax.set_facecolor("#161b22")
+                ax.tick_params(colors="#8b949e")
+                ax.title.set_color("#e6edf3")
+                for spine in ax.spines.values():
+                    spine.set_edgecolor("#30363d")
+            plt.tight_layout()
+            plots.append(fig_to_base64(fig))
+
     if target_column and target_column in df.columns:
         if df[target_column].dtype == object or df[target_column].nunique() < 20:
             class_counts = df[target_column].value_counts()
