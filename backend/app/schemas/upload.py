@@ -37,6 +37,7 @@ class ColumnInfo(BaseModel):
 
 
 class UploadResponse(BaseModel):
+    id: int | None = None
     filename: str
     rows: int
     columns: int

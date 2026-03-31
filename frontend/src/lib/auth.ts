@@ -37,15 +37,18 @@ export async function register(
 }
 
 export function saveTokens(tokens: TokenResponse) {
+  if (typeof window === "undefined") return;
   localStorage.setItem("access_token", tokens.access_token);
   localStorage.setItem("refresh_token", tokens.refresh_token);
 }
 
 export function clearTokens() {
+  if (typeof window === "undefined") return;
   localStorage.removeItem("access_token");
   localStorage.removeItem("refresh_token");
 }
 
 export function getAccessToken(): string | null {
+  if (typeof window === "undefined") return null;
   return localStorage.getItem("access_token");
 }

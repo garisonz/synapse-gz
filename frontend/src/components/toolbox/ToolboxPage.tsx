@@ -1,8 +1,16 @@
 "use client"
 
+import React from "react"
 import { useToolboxState } from "@/hooks/useToolboxState"
+import { ModeNav } from "./ModeNav"
+import { UploadPanel } from "./UploadPanel"
+import { HistoryPanel } from "./HistoryPanel"
+import { EdaPanel } from "./EdaPanel"
+import { FeaturePanel } from "./FeaturePanel"
 import { ConfigPanel } from "./ConfigPanel"
 import { NotebookPanel } from "./NotebookPanel"
+
+const RUN_MODES = ["training"]
 
 export function ToolboxPage() {
   const {
@@ -23,13 +31,11 @@ export function ToolboxPage() {
     setFeatureConfig,
     trainingConfig,
     setTrainingConfig,
-    comparisonConfig,
-    setComparisonConfig,
   } = useToolboxState()
 
   return (
     <div
-      className="flex flex-col flex-1 overflow-hidden"
+      className="flex flex-1 overflow-hidden"
       style={
         {
           "--bg-primary": "#ffffff",
@@ -45,46 +51,54 @@ export function ToolboxPage() {
         } as React.CSSProperties
       }
     >
-      {/* Header */}
-      <header
-        className="px-4 py-3 shrink-0"
-        style={{ borderBottom: "1px solid var(--border)" }}
-      >
-        <h1
-          className="text-sm font-semibold tracking-wide"
-          style={{ color: "var(--text-primary)" }}
-        >
-          Toolbox
-        </h1>
-      </header>
+      {/* Left mode nav */}
+      <ModeNav mode={mode} onModeChange={setMode} />
 
-      {/* Body */}
-      <div className="flex flex-1 overflow-hidden">
-        <ConfigPanel
-          mode={mode}
-          onModeChange={setMode}
-          columns={columns}
-          hasFile={!!file}
-          isRunning={isRunning}
-          onRun={handleRun}
-          edaConfig={edaConfig}
-          onEdaConfigChange={setEdaConfig}
-          featureConfig={featureConfig}
-          onFeatureConfigChange={setFeatureConfig}
-          trainingConfig={trainingConfig}
-          onTrainingConfigChange={setTrainingConfig}
-          comparisonConfig={comparisonConfig}
-          onComparisonConfigChange={setComparisonConfig}
-        />
-        <NotebookPanel
+      {/* Upload mode */}
+      {mode === "upload" && (
+        <UploadPanel
           file={file}
           parsedRows={parsedRows}
-          cells={cells}
           onFileChange={handleFileChange}
           onRemove={handleRemove}
-          onDeleteCell={handleDeleteCell}
         />
-      </div>
+      )}
+
+      {/* History mode */}
+      {mode === "history" && <HistoryPanel />}
+
+      {/* EDA mode */}
+      {mode === "eda" && <EdaPanel parsedRows={parsedRows} />}
+
+      {/* Feature Engineering mode */}
+      {mode === "feature" && <FeaturePanel parsedRows={parsedRows} />}
+
+      {/* Run-based modes (training, comparison) */}
+      {RUN_MODES.includes(mode) && (
+        <>
+          <ConfigPanel
+            mode={mode}
+            columns={columns}
+            hasFile={!!file}
+            isRunning={isRunning}
+            onRun={handleRun}
+            edaConfig={edaConfig}
+            onEdaConfigChange={setEdaConfig}
+            featureConfig={featureConfig}
+            onFeatureConfigChange={setFeatureConfig}
+            trainingConfig={trainingConfig}
+            onTrainingConfigChange={setTrainingConfig}
+          />
+          <NotebookPanel
+            file={file}
+            parsedRows={parsedRows}
+            cells={cells}
+            onFileChange={handleFileChange}
+            onRemove={handleRemove}
+            onDeleteCell={handleDeleteCell}
+          />
+        </>
+      )}
     </div>
   )
 }

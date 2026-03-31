@@ -3,7 +3,8 @@ app/api/features.py — POST /api/features route handler.
 
 Receives a file and transformation parameters from the frontend, parses the
 file into a DataFrame, then delegates to feature_engine.py to apply the
-requested transformation.
+requested transformation. If a valid auth token is provided, the result is
+saved to the database.
 
 Form fields:
   file            — uploaded CSV/XLSX/XLS dataset.
@@ -26,9 +27,16 @@ How it works:
   2. JSON-decodes the columns list; defaults to all columns if empty.
   3. Calls apply_transform() from feature_engine.py and returns a
      FeatureResponse with original / generated / total column counts.
+  4. If the request includes a valid bearer token, saves a FeatureRun record.
 """
 import json
-from fastapi import APIRouter, UploadFile, File, Form, HTTPException
+from fastapi import APIRouter, Depends, UploadFile, File, Form, HTTPException
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.api.auth import get_optional_user
+from app.db.session import get_db
+from app.models.history import FeatureRun
+from app.models.user import User
 from app.schemas.features import FeatureResponse
 from app.services.file_parser import parse_file
 from app.services.feature_engine import apply_transform
@@ -42,6 +50,8 @@ async def features(
     columns: str = Form(default="[]"),
     method: str = Form(default="standard"),
     impute_strategy: str = Form(default=""),
+    current_user: User | None = Depends(get_optional_user),
+    db: AsyncSession = Depends(get_db),
 ):
     content = await file.read()
     filename = file.filename or "upload.csv"
@@ -56,10 +66,22 @@ async def features(
     except Exception:
         columns_list = df.columns.tolist()
 
-    # Default to all columns if none selected
     if not columns_list:
         columns_list = df.columns.tolist()
 
     impute = impute_strategy.strip() or None
 
-    return apply_transform(df, columns_list, method, impute)
+    result = apply_transform(df, columns_list, method, impute)
+
+    if current_user is not None:
+        record = FeatureRun(
+            user_id=current_user.id,
+            method=method,
+            columns_used=columns_list,
+            impute_strategy=impute,
+            metrics=[m.model_dump() for m in result.metrics],
+        )
+        db.add(record)
+        await db.commit()
+
+    return result

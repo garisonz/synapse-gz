@@ -17,3 +17,9 @@ class User(Base):
         default=lambda: datetime.now(timezone.utc),
         nullable=False,
     )
+
+    datasets = relationship("DatasetUpload", back_populates="user", cascade="all, delete-orphan")
+    eda_results = relationship("EDAResult", back_populates="user", cascade="all, delete-orphan")
+    feature_runs = relationship("FeatureRun", back_populates="user", cascade="all, delete-orphan")
+    training_runs = relationship("TrainingRun", back_populates="user", cascade="all, delete-orphan")
+    comparisons = relationship("ModelComparison", back_populates="user", cascade="all, delete-orphan")

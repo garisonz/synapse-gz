@@ -1,28 +1,23 @@
 "use client"
 
-import { ModeSelector } from "./ModeSelector"
 import { EdaConfig } from "./config-forms/EdaConfig"
 import { FeatureConfig } from "./config-forms/FeatureConfig"
 import { TrainingConfig } from "./config-forms/TrainingConfig"
-import { ComparisonConfig } from "./config-forms/ComparisonConfig"
 import { Button } from "@/components/ui/button"
 import type {
   EdaConfig as EdaConfigType,
   FeatureConfig as FeatureConfigType,
   TrainingConfig as TrainingConfigType,
-  ComparisonConfig as ComparisonConfigType,
 } from "@/hooks/useToolboxState"
 
 const MODE_LABELS: Record<string, string> = {
   eda: "Auto EDA",
   feature: "Feature Engineering",
   training: "Model Training",
-  comparison: "Comparison",
 }
 
 interface ConfigPanelProps {
   mode: string
-  onModeChange: (mode: string) => void
   columns: string[]
   hasFile: boolean
   isRunning: boolean
@@ -33,8 +28,6 @@ interface ConfigPanelProps {
   onFeatureConfigChange: (c: FeatureConfigType) => void
   trainingConfig: TrainingConfigType
   onTrainingConfigChange: (c: TrainingConfigType) => void
-  comparisonConfig: ComparisonConfigType
-  onComparisonConfigChange: (c: ComparisonConfigType) => void
 }
 
 function renderConfigForm(
@@ -48,8 +41,6 @@ function renderConfigForm(
     | "onFeatureConfigChange"
     | "trainingConfig"
     | "onTrainingConfigChange"
-    | "comparisonConfig"
-    | "onComparisonConfigChange"
   >
 ) {
   switch (mode) {
@@ -77,14 +68,6 @@ function renderConfigForm(
           onChange={props.onTrainingConfigChange}
         />
       )
-    case "comparison":
-      return (
-        <ComparisonConfig
-          columns={columns}
-          value={props.comparisonConfig}
-          onChange={props.onComparisonConfigChange}
-        />
-      )
     default:
       return null
   }
@@ -92,7 +75,6 @@ function renderConfigForm(
 
 export function ConfigPanel({
   mode,
-  onModeChange,
   columns,
   hasFile,
   isRunning,
@@ -103,8 +85,6 @@ export function ConfigPanel({
   onFeatureConfigChange,
   trainingConfig,
   onTrainingConfigChange,
-  comparisonConfig,
-  onComparisonConfigChange,
 }: ConfigPanelProps) {
   return (
     <div
@@ -114,17 +94,6 @@ export function ConfigPanel({
         borderRight: "1px solid var(--border)",
       }}
     >
-      {/* Mode selector */}
-      <div style={{ borderBottom: "1px solid var(--border)" }}>
-        <div
-          className="px-4 pt-3 pb-1 text-[10px] font-semibold tracking-widest uppercase"
-          style={{ color: "var(--text-muted)" }}
-        >
-          Mode
-        </div>
-        <ModeSelector mode={mode} onModeChange={onModeChange} />
-      </div>
-
       {/* Config form */}
       <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-3">
         <div
@@ -145,8 +114,6 @@ export function ConfigPanel({
             onFeatureConfigChange,
             trainingConfig,
             onTrainingConfigChange,
-            comparisonConfig,
-            onComparisonConfigChange,
           })
         )}
       </div>

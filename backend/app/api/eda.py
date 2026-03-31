@@ -3,7 +3,8 @@ app/api/eda.py — POST /api/eda route handler.
 
 Receives a file and an analysis configuration from the frontend, parses the
 file into a DataFrame, then delegates to eda_engine.py to perform the
-requested analyses.
+requested analyses. If a valid auth token is provided, the result is saved
+to the database.
 
 Form fields:
   file          — uploaded CSV/XLSX/XLS dataset.
@@ -21,9 +22,16 @@ How it works:
      if not found.
   4. Calls run_eda() from eda_engine.py and returns the EDAResponse (metrics
      list + base64-encoded plot images).
+  5. If the request includes a valid bearer token, saves an EDAResult record.
 """
 import json
-from fastapi import APIRouter, UploadFile, File, Form, HTTPException
+from fastapi import APIRouter, Depends, UploadFile, File, Form, HTTPException
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.api.auth import get_optional_user
+from app.db.session import get_db
+from app.models.history import EDAResult
+from app.models.user import User
 from app.schemas.eda import EDAResponse
 from app.services.file_parser import parse_file
 from app.services.eda_engine import run_eda
@@ -36,6 +44,8 @@ async def eda(
     file: UploadFile = File(...),
     analyses: str = Form(default='["summary","missing","distribution","correlation","outliers"]'),
     target_column: str = Form(default=""),
+    current_user: User | None = Depends(get_optional_user),
+    db: AsyncSession = Depends(get_db),
 ):
     content = await file.read()
     filename = file.filename or "upload.csv"
@@ -54,4 +64,17 @@ async def eda(
     if target and target not in df.columns:
         target = None
 
-    return run_eda(df, analyses_list, target)
+    result = run_eda(df, analyses_list, target)
+
+    if current_user is not None:
+        record = EDAResult(
+            user_id=current_user.id,
+            analyses=analyses_list,
+            target_column=target,
+            metrics=[m.model_dump() for m in result.metrics],
+            plots=result.plots,
+        )
+        db.add(record)
+        await db.commit()
+
+    return result

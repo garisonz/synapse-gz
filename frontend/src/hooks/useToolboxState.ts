@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import { useCsvParser } from "./useCsvParser"
+import { getAccessToken } from "@/lib/auth"
 
 export type CellStatus = "running" | "complete" | "error"
 export type Metric = { label: string; value: string | number }
@@ -12,27 +13,27 @@ export type NotebookCellData = {
   timestamp: string
   configSummary: string
   metrics: Metric[] | null
+  plots: string[]
+  errorMessage?: string
 }
 
 export const MODE_LABELS: Record<string, string> = {
   eda: "Auto EDA",
   feature: "Feature Engineering",
   training: "Model Training",
-  comparison: "Comparison",
 }
 
 export type EdaConfig = { analyses: string[]; targetColumn: string }
-export type FeatureConfig = { columns: string[]; method: string }
+export type FeatureConfig = {
+  columns: string[]
+  method: string
+  imputeStrategy: string
+}
 export type TrainingConfig = {
   targetColumn: string
   taskType: string
   model: string
   testSplit: string
-}
-export type ComparisonConfig = {
-  targetColumn: string
-  selectedModels: string[]
-  primaryMetric: string
 }
 
 const ANALYSIS_KEY: Record<string, string> = {
@@ -66,20 +67,32 @@ const METHOD_KEY: Record<string, string> = {
   "Interaction Terms": "polynomial",
 }
 
+const TASK_MAP: Record<string, string> = {
+  "Auto-detect": "classification",
+  Classification: "classification",
+  Regression: "regression",
+}
+
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000"
+
+function authHeaders(): Record<string, string> {
+  const token = getAccessToken()
+  return token ? { Authorization: `Bearer ${token}` } : {}
+}
 
 export function useToolboxState() {
   const {
     file,
     parsedRows,
     columns,
-    handleFileChange,
+    handleFileChange: csvHandleFileChange,
     handleRemove: csvHandleRemove,
   } = useCsvParser()
 
-  const [mode, setMode] = useState("eda")
+  const [mode, setMode] = useState("upload")
   const [cells, setCells] = useState<NotebookCellData[]>([])
   const [isRunning, setIsRunning] = useState(false)
+  const [datasetId, setDatasetId] = useState<number | null>(null)
 
   const [edaConfig, setEdaConfig] = useState<EdaConfig>({
     analyses: ["Distribution", "Correlation", "Missing Values"],
@@ -88,6 +101,7 @@ export function useToolboxState() {
   const [featureConfig, setFeatureConfig] = useState<FeatureConfig>({
     columns: [],
     method: "Auto",
+    imputeStrategy: "none",
   })
   const [trainingConfig, setTrainingConfig] = useState<TrainingConfig>({
     targetColumn: "",
@@ -95,11 +109,31 @@ export function useToolboxState() {
     model: "XGBoost",
     testSplit: "20%",
   })
-  const [comparisonConfig, setComparisonConfig] = useState<ComparisonConfig>({
-    targetColumn: "",
-    selectedModels: ["XGBoost", "Random Forest"],
-    primaryMetric: "Accuracy",
-  })
+  // Upload file to the backend for DB recording; returns dataset id if authenticated
+  const uploadFile = async (f: File): Promise<void> => {
+    const token = getAccessToken()
+    if (!token) return
+    try {
+      const fd = new FormData()
+      fd.append("file", f)
+      const res = await fetch(`${API_URL}/api/upload`, {
+        method: "POST",
+        body: fd,
+        headers: authHeaders(),
+      })
+      if (res.ok) {
+        const data = await res.json()
+        if (data.id) setDatasetId(data.id)
+      }
+    } catch {
+      // Non-critical — upload recording failure should not block analysis
+    }
+  }
+
+  const handleFileChange = (f: File) => {
+    csvHandleFileChange(f)
+    uploadFile(f)
+  }
 
   const buildFormData = (): FormData | null => {
     if (!file) return null
@@ -113,32 +147,15 @@ export function useToolboxState() {
     } else if (mode === "feature") {
       fd.append("columns", JSON.stringify(featureConfig.columns))
       fd.append("method", METHOD_KEY[featureConfig.method] ?? "standard")
+      if (featureConfig.imputeStrategy && featureConfig.imputeStrategy !== "none") {
+        fd.append("impute_strategy", featureConfig.imputeStrategy)
+      }
     } else if (mode === "training") {
       if (!trainingConfig.targetColumn) return null
       fd.append("target_column", trainingConfig.targetColumn)
-      const taskMap: Record<string, string> = {
-        "Auto-detect": "classification",
-        Classification: "classification",
-        Regression: "regression",
-      }
-      fd.append("task_type", taskMap[trainingConfig.taskType] ?? "classification")
+      fd.append("task_type", TASK_MAP[trainingConfig.taskType] ?? "classification")
       fd.append("model", MODEL_KEY[trainingConfig.model] ?? "random_forest")
-      fd.append(
-        "test_split",
-        String(parseInt(trainingConfig.testSplit) / 100)
-      )
-    } else if (mode === "comparison") {
-      if (!comparisonConfig.targetColumn) return null
-      fd.append("target_column", comparisonConfig.targetColumn)
-      fd.append("task_type", "classification")
-      const mappedModels = comparisonConfig.selectedModels.map(
-        (m) => MODEL_KEY[m] ?? m.toLowerCase()
-      )
-      fd.append("models", JSON.stringify(mappedModels))
-      fd.append(
-        "primary_metric",
-        comparisonConfig.primaryMetric.toLowerCase().replace(/\s+/g, "_")
-      )
+      fd.append("test_split", String(parseInt(trainingConfig.testSplit) / 100))
     }
     return fd
   }
@@ -148,7 +165,6 @@ export function useToolboxState() {
       eda: "/api/eda",
       feature: "/api/features",
       training: "/api/train",
-      comparison: "/api/compare",
     }
     return API_URL + (map[mode] ?? "/api/eda")
   }
@@ -166,12 +182,17 @@ export function useToolboxState() {
       timestamp: new Date().toLocaleTimeString(),
       configSummary: `${MODE_LABELS[mode] ?? mode} on ${file.name}`,
       metrics: null,
+      plots: [],
     }
     setCells((prev) => [...prev, newCell])
     setIsRunning(true)
 
     try {
-      const res = await fetch(getEndpoint(), { method: "POST", body: fd })
+      const res = await fetch(getEndpoint(), {
+        method: "POST",
+        body: fd,
+        headers: authHeaders(),
+      })
       if (!res.ok) {
         const err = await res.json().catch(() => ({ detail: "Request failed" }))
         throw new Error(err.detail ?? "Request failed")
@@ -184,14 +205,18 @@ export function useToolboxState() {
                 ...cell,
                 status: "complete" as CellStatus,
                 metrics: data.metrics ?? [],
+                plots: data.plots ?? [],
               }
             : cell
         )
       )
-    } catch {
+    } catch (e) {
+      const errorMessage = e instanceof Error ? e.message : "Request failed"
       setCells((prev) =>
         prev.map((cell) =>
-          cell.id === id ? { ...cell, status: "error" as CellStatus } : cell
+          cell.id === id
+            ? { ...cell, status: "error" as CellStatus, errorMessage }
+            : cell
         )
       )
     } finally {
@@ -206,6 +231,7 @@ export function useToolboxState() {
   const handleRemove = () => {
     csvHandleRemove()
     setCells([])
+    setDatasetId(null)
   }
 
   return {
@@ -216,6 +242,7 @@ export function useToolboxState() {
     setMode,
     cells,
     isRunning,
+    datasetId,
     handleFileChange,
     handleRun,
     handleDeleteCell,
@@ -226,7 +253,5 @@ export function useToolboxState() {
     setFeatureConfig,
     trainingConfig,
     setTrainingConfig,
-    comparisonConfig,
-    setComparisonConfig,
   }
 }

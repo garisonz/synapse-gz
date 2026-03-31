@@ -28,7 +28,7 @@ export function FileDropZone({ onFileChange }: FileDropZoneProps) {
     e.preventDefault()
     setIsDragging(false)
     const file = e.dataTransfer.files[0]
-    if (file && file.name.endsWith(".csv")) {
+    if (file && /\.(csv|xlsx|xls)$/i.test(file.name)) {
       onFileChange(file)
     }
   }
@@ -60,7 +60,7 @@ export function FileDropZone({ onFileChange }: FileDropZoneProps) {
         <input
           ref={inputRef}
           type="file"
-          accept=".csv"
+          accept=".csv,.xlsx,.xls"
           className="hidden"
           onChange={handleInputChange}
         />
@@ -78,7 +78,7 @@ export function FileDropZone({ onFileChange }: FileDropZoneProps) {
           <line x1="12" y1="3" x2="12" y2="15" />
         </svg>
         <div className="flex flex-col items-center gap-1">
-          <span className="text-sm font-medium">Drag &amp; drop a CSV file</span>
+          <span className="text-sm font-medium">Drag &amp; drop a CSV, XLSX, or XLS file</span>
           <span className="text-xs" style={{ color: "var(--text-muted)" }}>
             or{" "}
             <span

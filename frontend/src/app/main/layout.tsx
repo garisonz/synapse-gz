@@ -1,5 +1,7 @@
-import Link from "next/link"
+"use client"
 
+import Link from "next/link"
+import { AuthGuard } from "@/components/AuthGuard"
 import {
   NavigationMenu,
   NavigationMenuItem,
@@ -9,32 +11,34 @@ import {
 } from "@/components/ui/navigation-menu"
 
 export default function MainLayout({ children }: { children: React.ReactNode }) {
-    return (
-        <div className="h-screen flex flex-col">
-            <header className="border-b px-4 py-2">
-                <NavigationMenu>
-                    <NavigationMenuList>
-                        <NavigationMenuItem>
-                            <NavigationMenuLink asChild className={navigationMenuTriggerStyle()}>
-                                <Link href="/main">Home</Link>
-                            </NavigationMenuLink>
-                        </NavigationMenuItem>
-                        <NavigationMenuItem>
-                            <NavigationMenuLink asChild className={navigationMenuTriggerStyle()}>
-                                <Link href="/main/toolbox">Tools</Link>
-                            </NavigationMenuLink>
-                        </NavigationMenuItem>
-                        <NavigationMenuItem>
-                            <NavigationMenuLink asChild className={navigationMenuTriggerStyle()}>
-                                <Link href="/main/docs">Documentation</Link>
-                            </NavigationMenuLink>
-                        </NavigationMenuItem>
-                    </NavigationMenuList>
-                </NavigationMenu>
-            </header>
-            <main className="flex-1 flex flex-col overflow-hidden">
-                {children}
-            </main>
-        </div>
-    )
+  return (
+    <AuthGuard>
+      <div className="h-screen flex flex-col">
+        <header className="border-b px-4 py-2">
+          <NavigationMenu>
+            <NavigationMenuList>
+              <NavigationMenuItem>
+                <NavigationMenuLink asChild className={navigationMenuTriggerStyle()}>
+                  <Link href="/main">Home</Link>
+                </NavigationMenuLink>
+              </NavigationMenuItem>
+              <NavigationMenuItem>
+                <NavigationMenuLink asChild className={navigationMenuTriggerStyle()}>
+                  <Link href="/main/toolbox">Tools</Link>
+                </NavigationMenuLink>
+              </NavigationMenuItem>
+<NavigationMenuItem>
+                <NavigationMenuLink asChild className={navigationMenuTriggerStyle()}>
+                  <Link href="/main/docs">Documentation</Link>
+                </NavigationMenuLink>
+              </NavigationMenuItem>
+            </NavigationMenuList>
+          </NavigationMenu>
+        </header>
+        <main className="flex-1 flex flex-col overflow-hidden">
+          {children}
+        </main>
+      </div>
+    </AuthGuard>
+  )
 }

@@ -271,37 +271,89 @@ export function NotebookCell({ cell, index, onDelete }: NotebookCellProps) {
                     {MODE_LABELS[cell.mode] ?? cell.mode} Running...
                   </span>
                 </div>
-              ) : cell.status === "complete" && cell.metrics ? (
-                <div className="flex flex-col gap-3">
-                  <p className="text-sm" style={{ color: "var(--text-muted)" }}>
-                    Analysis complete. Results ready.
-                  </p>
-                  <div className="flex gap-3 flex-wrap">
-                    {cell.metrics.map((metric, i) => (
-                      <Card
-                        key={i}
-                        className="px-4 py-3 flex flex-col gap-0.5 border"
-                        style={{
-                          background: "var(--surface-active)",
-                          borderColor: "var(--border)",
-                          minWidth: "90px",
-                        }}
-                      >
-                        <span
-                          className="text-[10px] uppercase tracking-widest font-semibold"
-                          style={{ color: "var(--text-muted)" }}
-                        >
-                          {metric.label}
-                        </span>
-                        <span
-                          className="text-xl font-bold"
-                          style={{ color: "var(--text-primary)" }}
-                        >
-                          {metric.value}
-                        </span>
-                      </Card>
-                    ))}
+              ) : cell.status === "error" ? (
+                <div
+                  className="flex flex-col gap-2 py-4"
+                  style={{ color: "#f87171" }}
+                >
+                  <div className="flex items-center gap-2">
+                    <svg
+                      width="16"
+                      height="16"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                    >
+                      <circle cx="12" cy="12" r="10" />
+                      <line x1="12" y1="8" x2="12" y2="12" />
+                      <line x1="12" y1="16" x2="12.01" y2="16" />
+                    </svg>
+                    <span className="text-sm font-medium">Analysis failed</span>
                   </div>
+                  {cell.errorMessage && (
+                    <p
+                      className="text-xs font-mono px-3 py-2 rounded"
+                      style={{
+                        background: "rgba(239, 68, 68, 0.08)",
+                        color: "#f87171",
+                      }}
+                    >
+                      {cell.errorMessage}
+                    </p>
+                  )}
+                </div>
+              ) : cell.status === "complete" ? (
+                <div className="flex flex-col gap-4">
+                  {/* Metrics */}
+                  {cell.metrics && cell.metrics.length > 0 && (
+                    <div className="flex flex-col gap-2">
+                      <p className="text-sm" style={{ color: "var(--text-muted)" }}>
+                        Analysis complete. Results ready.
+                      </p>
+                      <div className="flex gap-3 flex-wrap">
+                        {cell.metrics.map((metric, i) => (
+                          <Card
+                            key={i}
+                            className="px-4 py-3 flex flex-col gap-0.5 border"
+                            style={{
+                              background: "var(--surface-active)",
+                              borderColor: "var(--border)",
+                              minWidth: "90px",
+                            }}
+                          >
+                            <span
+                              className="text-[10px] uppercase tracking-widest font-semibold"
+                              style={{ color: "var(--text-muted)" }}
+                            >
+                              {metric.label}
+                            </span>
+                            <span
+                              className="text-xl font-bold"
+                              style={{ color: "var(--text-primary)" }}
+                            >
+                              {metric.value}
+                            </span>
+                          </Card>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Plots */}
+                  {cell.plots && cell.plots.length > 0 && (
+                    <div className="flex flex-col gap-3">
+                      {cell.plots.map((src, i) => (
+                        <img
+                          key={i}
+                          src={src}
+                          alt={`Plot ${i + 1}`}
+                          className="rounded-lg w-full"
+                          style={{ border: "1px solid var(--border)" }}
+                        />
+                      ))}
+                    </div>
+                  )}
                 </div>
               ) : null}
             </div>

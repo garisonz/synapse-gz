@@ -11,7 +11,7 @@ from alembic import context
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
 from app.db.base import Base  # noqa: E402
-from app.models import user  # noqa: F401, E402 — import all models so Base.metadata is populated
+from app.models import user, history  # noqa: F401, E402 — import all models so Base.metadata is populated
 
 config = context.config
 
