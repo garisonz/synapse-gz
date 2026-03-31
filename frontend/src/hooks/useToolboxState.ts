@@ -15,6 +15,7 @@ export type NotebookCellData = {
   metrics: Metric[] | null
   plots: string[]
   errorMessage?: string
+  confusionMatrix?: number[][] | null
 }
 
 export const MODE_LABELS: Record<string, string> = {
@@ -175,12 +176,17 @@ export function useToolboxState() {
     if (!fd) return
 
     const id = crypto.randomUUID()
+    const configSummary =
+      mode === "training" && trainingConfig.targetColumn
+        ? `${trainingConfig.model} → ${trainingConfig.targetColumn} on ${file.name}`
+        : `${MODE_LABELS[mode] ?? mode} on ${file.name}`
+
     const newCell: NotebookCellData = {
       id,
       mode,
       status: "running",
       timestamp: new Date().toLocaleTimeString(),
-      configSummary: `${MODE_LABELS[mode] ?? mode} on ${file.name}`,
+      configSummary,
       metrics: null,
       plots: [],
     }
@@ -206,6 +212,7 @@ export function useToolboxState() {
                 status: "complete" as CellStatus,
                 metrics: data.metrics ?? [],
                 plots: data.plots ?? [],
+                confusionMatrix: data.confusion_matrix ?? null,
               }
             : cell
         )

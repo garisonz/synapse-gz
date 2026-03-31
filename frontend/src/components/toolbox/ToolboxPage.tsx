@@ -9,8 +9,9 @@ import { EdaPanel } from "./EdaPanel"
 import { FeaturePanel } from "./FeaturePanel"
 import { ConfigPanel } from "./ConfigPanel"
 import { NotebookPanel } from "./NotebookPanel"
+import { TrainingPanel } from "./TrainingPanel"
 
-const RUN_MODES = ["training"]
+const RUN_MODES: string[] = []
 
 export function ToolboxPage() {
   const {
@@ -39,13 +40,13 @@ export function ToolboxPage() {
       style={
         {
           "--bg-primary": "#ffffff",
-          "--bg-secondary": "#f8f9fa",
-          "--surface-hover": "#f1f3f5",
-          "--surface-active": "#e9ecef",
-          "--border": "#dee2e6",
-          "--text-primary": "#1a1a2e",
-          "--text-secondary": "#495057",
-          "--text-muted": "#adb5bd",
+          "--bg-secondary": "#f9fafb",
+          "--surface-hover": "#f3f4f6",
+          "--surface-active": "#e5e7eb",
+          "--border": "#e5e7eb",
+          "--text-primary": "#111827",
+          "--text-secondary": "#4b5563",
+          "--text-muted": "#9ca3af",
           background: "var(--bg-primary)",
           color: "var(--text-primary)",
         } as React.CSSProperties
@@ -73,7 +74,23 @@ export function ToolboxPage() {
       {/* Feature Engineering mode */}
       {mode === "feature" && <FeaturePanel parsedRows={parsedRows} />}
 
-      {/* Run-based modes (training, comparison) */}
+      {/* Model Training mode */}
+      {mode === "training" && (
+        <TrainingPanel
+          file={file}
+          parsedRows={parsedRows}
+          columns={columns}
+          trainingConfig={trainingConfig}
+          onTrainingConfigChange={setTrainingConfig}
+          isRunning={isRunning}
+          onRun={handleRun}
+          cells={cells}
+          onFileChange={handleFileChange}
+          onRemove={handleRemove}
+        />
+      )}
+
+      {/* Run-based modes (comparison, etc.) */}
       {RUN_MODES.includes(mode) && (
         <>
           <ConfigPanel

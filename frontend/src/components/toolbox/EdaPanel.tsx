@@ -75,7 +75,7 @@ function StatCard({ label, value }: { label: string; value: string }) {
       style={{ borderColor: "var(--border)", background: "var(--bg-secondary)" }}
     >
       <span
-        className="text-[10px] font-semibold tracking-widest uppercase"
+        className="text-xs font-semibold"
         style={{ color: "var(--text-muted)" }}
       >
         {label}
@@ -495,7 +495,7 @@ export function EdaPanel({ parsedRows }: EdaPanelProps) {
         style={{ borderBottom: "1px solid var(--border)", background: "var(--bg-secondary)" }}
       >
         <span
-          className="text-[10px] font-semibold tracking-widest uppercase shrink-0"
+          className="text-xs font-semibold shrink-0"
           style={{ color: "var(--text-muted)" }}
         >
           Column
@@ -505,11 +505,12 @@ export function EdaPanel({ parsedRows }: EdaPanelProps) {
             <button
               key={col}
               onClick={() => setSelectedCol(i)}
-              className="text-xs px-2.5 py-1 rounded-md transition-colors font-mono"
+              className="text-xs px-2.5 py-1 rounded-full transition-all font-mono"
               style={{
-                background: selectedCol === i ? "var(--text-primary)" : "var(--surface-active)",
-                color: selectedCol === i ? "var(--bg-primary)" : "var(--text-secondary)",
-                border: "1px solid var(--border)",
+                background: selectedCol === i ? "rgba(139,92,246,0.1)" : "var(--surface-active)",
+                color: selectedCol === i ? "#8b5cf6" : "var(--text-secondary)",
+                border: selectedCol === i ? "1px solid rgba(139,92,246,0.3)" : "1px solid var(--border)",
+                fontWeight: selectedCol === i ? 600 : 400,
               }}
             >
               {col}
@@ -527,10 +528,10 @@ export function EdaPanel({ parsedRows }: EdaPanelProps) {
           <button
             key={t.key}
             onClick={() => setTab(t.key)}
-            className="text-sm px-4 py-2.5 transition-colors"
+            className="text-sm px-4 py-2.5 transition-all"
             style={{
-              color: tab === t.key ? "var(--text-primary)" : "var(--text-muted)",
-              borderBottom: tab === t.key ? "2px solid var(--text-primary)" : "2px solid transparent",
+              color: tab === t.key ? "#8b5cf6" : "var(--text-muted)",
+              borderBottom: tab === t.key ? "2px solid #8b5cf6" : "2px solid transparent",
               fontWeight: tab === t.key ? 600 : 400,
               marginBottom: -1,
             }}
@@ -548,7 +549,7 @@ export function EdaPanel({ parsedRows }: EdaPanelProps) {
           <div className="flex flex-col gap-6 max-w-2xl">
             <div>
               <p
-                className="text-[10px] font-semibold tracking-widest uppercase mb-3"
+                className="text-xs font-semibold mb-3"
                 style={{ color: "var(--text-muted)" }}
               >
                 {columns[selectedCol]}
@@ -574,7 +575,7 @@ export function EdaPanel({ parsedRows }: EdaPanelProps) {
 
             <div>
               <p
-                className="text-[10px] font-semibold tracking-widest uppercase mb-2"
+                className="text-xs font-semibold mb-2"
                 style={{ color: "var(--text-muted)" }}
               >
                 Top Values
@@ -633,7 +634,7 @@ export function EdaPanel({ parsedRows }: EdaPanelProps) {
           <div className="flex flex-col gap-7 max-w-3xl">
             <div>
               <p
-                className="text-[10px] font-semibold tracking-widest uppercase mb-3"
+                className="text-xs font-semibold mb-3"
                 style={{ color: "var(--text-muted)" }}
               >
                 Distribution — Top 10 Values
@@ -649,7 +650,7 @@ export function EdaPanel({ parsedRows }: EdaPanelProps) {
             {numeric && numStats ? (
               <div>
                 <p
-                  className="text-[10px] font-semibold tracking-widest uppercase mb-3"
+                  className="text-xs font-semibold mb-3"
                   style={{ color: "var(--text-muted)" }}
                 >
                   Box Plot — Outlier Analysis
@@ -681,7 +682,7 @@ export function EdaPanel({ parsedRows }: EdaPanelProps) {
         {tab === "correlation" && (
           <div className="flex flex-col gap-4 max-w-4xl">
             <p
-              className="text-[10px] font-semibold tracking-widest uppercase"
+              className="text-xs font-semibold"
               style={{ color: "var(--text-muted)" }}
             >
               Feature Correlation Matrix — Pearson Coefficient
@@ -699,7 +700,7 @@ export function EdaPanel({ parsedRows }: EdaPanelProps) {
         {tab === "raw" && (
           <div className="flex flex-col gap-4">
             <p
-              className="text-[10px] font-semibold tracking-widest uppercase"
+              className="text-xs font-semibold"
               style={{ color: "var(--text-muted)" }}
             >
               Raw Data Inspector

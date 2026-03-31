@@ -49,7 +49,10 @@ from sklearn.neural_network import MLPClassifier, MLPRegressor
 from sklearn.metrics import (
     accuracy_score,
     f1_score,
+    precision_score,
+    recall_score,
     roc_auc_score,
+    confusion_matrix,
     mean_squared_error,
     r2_score,
     mean_absolute_error,
@@ -131,18 +134,26 @@ def train_model(
     y_pred = model.predict(X_test)
 
     metrics: list[Metric] = []
+    cm: list[list[int]] | None = None
 
     if task_type == "classification":
         acc = accuracy_score(y_test, y_pred)
+        prec = precision_score(y_test, y_pred, average="weighted", zero_division=0)
+        rec = recall_score(y_test, y_pred, average="weighted", zero_division=0)
         f1 = f1_score(y_test, y_pred, average="weighted", zero_division=0)
         metrics.append(Metric(label="Accuracy", value=f"{acc:.1%}"))
+        metrics.append(Metric(label="Precision", value=f"{prec:.3f}"))
+        metrics.append(Metric(label="Recall", value=f"{rec:.3f}"))
         metrics.append(Metric(label="F1 Score", value=f"{f1:.3f}"))
         # AUC only for binary
-        if len(np.unique(y_test)) == 2 and hasattr(model, "predict_proba"):
+        n_classes = len(np.unique(y_test))
+        if n_classes == 2 and hasattr(model, "predict_proba"):
             proba = model.predict_proba(X_test)[:, 1]
             auc = roc_auc_score(y_test, proba)
             metrics.append(Metric(label="AUC", value=f"{auc:.3f}"))
         metrics.append(Metric(label="Test samples", value=len(y_test)))
+        # Confusion matrix (return for all classification tasks)
+        cm = confusion_matrix(y_test, y_pred).tolist()
     else:
         rmse = float(np.sqrt(mean_squared_error(y_test, y_pred)))
         r2 = float(r2_score(y_test, y_pred))
@@ -152,7 +163,7 @@ def train_model(
         metrics.append(Metric(label="MAE", value=f"{mae:.4f}"))
         metrics.append(Metric(label="Test samples", value=len(y_test)))
 
-    return TrainResponse(metrics=metrics)
+    return TrainResponse(metrics=metrics, confusion_matrix=cm)
 
 
 def compare_models(

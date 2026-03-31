@@ -349,14 +349,14 @@ const CATEGORY_TEXT: Record<string, string> = {
 function LogIcon({ level }: { level: LogLevel }) {
   if (level === "success") {
     return (
-      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="2.5">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#34d399" strokeWidth="2.5">
         <polyline points="20 6 9 17 4 12" />
       </svg>
     )
   }
   if (level === "error") {
     return (
-      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#dc2626" strokeWidth="2.5">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#f87171" strokeWidth="2.5">
         <circle cx="12" cy="12" r="10" />
         <line x1="12" y1="8" x2="12" y2="12" />
         <line x1="12" y1="16" x2="12.01" y2="16" />
@@ -364,7 +364,7 @@ function LogIcon({ level }: { level: LogLevel }) {
     )
   }
   return (
-    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#2563eb" strokeWidth="2.5">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" strokeWidth="2.5">
       <circle cx="12" cy="12" r="10" />
       <line x1="12" y1="16" x2="12" y2="12" />
       <line x1="12" y1="8" x2="12.01" y2="8" />
@@ -373,9 +373,9 @@ function LogIcon({ level }: { level: LogLevel }) {
 }
 
 const LOG_COLOR: Record<LogLevel, string> = {
-  success: "#15803d",
-  error: "#b91c1c",
-  info: "#1d4ed8",
+  success: "#34d399",
+  error: "#f87171",
+  info: "#93c5fd",
 }
 
 // ── main panel ────────────────────────────────────────────────────────────────
@@ -467,7 +467,7 @@ export function FeaturePanel({ parsedRows }: FeaturePanelProps) {
       >
         {/* Dataset stats */}
         <div className="p-3 shrink-0" style={{ borderBottom: "1px solid var(--border)" }}>
-          <p className="text-[10px] font-semibold tracking-widest uppercase mb-2" style={{ color: "var(--text-muted)" }}>
+          <p className="text-xs font-semibold mb-2" style={{ color: "var(--text-muted)" }}>
             Active Dataset
           </p>
           <div className="grid grid-cols-2 gap-1.5">
@@ -495,12 +495,12 @@ export function FeaturePanel({ parsedRows }: FeaturePanelProps) {
 
         {/* Column header */}
         <div className="px-3 pt-2.5 pb-1.5 flex items-center justify-between shrink-0">
-          <span className="text-[10px] font-semibold tracking-widest uppercase" style={{ color: "var(--text-muted)" }}>
+          <span className="text-xs font-semibold" style={{ color: "var(--text-muted)" }}>
             Columns{" "}
             {selectedCols.size > 0 && (
               <span
                 className="ml-1 px-1.5 py-0.5 rounded-full text-[9px]"
-                style={{ background: "rgba(16,185,129,0.15)", color: "#34d399" }}
+                style={{ background: "rgba(245,158,11,0.12)", color: "#f59e0b" }}
               >
                 {selectedCols.size}
               </span>
@@ -539,15 +539,15 @@ export function FeaturePanel({ parsedRows }: FeaturePanelProps) {
                 onClick={() => toggleCol(i)}
                 className="w-full flex items-center gap-2 px-2 py-1.5 rounded-md mb-0.5 text-left transition-colors"
                 style={{
-                  background: isSelected ? "rgba(16,185,129,0.12)" : "transparent",
-                  border: isSelected ? "1px solid rgba(16,185,129,0.3)" : "1px solid transparent",
+                  background: isSelected ? "rgba(245,158,11,0.08)" : "transparent",
+                  border: isSelected ? "1px solid rgba(245,158,11,0.3)" : "1px solid transparent",
                 }}
               >
                 {/* Checkbox */}
                 <div
                   className="w-3.5 h-3.5 rounded shrink-0 flex items-center justify-center"
                   style={{
-                    background: isSelected ? "#34d399" : "var(--surface-active)",
+                    background: isSelected ? "#f59e0b" : "var(--surface-active)",
                     border: isSelected ? "none" : "1px solid var(--border)",
                   }}
                 >
@@ -586,7 +586,7 @@ export function FeaturePanel({ parsedRows }: FeaturePanelProps) {
         <div className="flex-1 overflow-y-auto p-5">
 
           {/* Transform grid */}
-          <p className="text-[10px] font-semibold tracking-widest uppercase mb-3" style={{ color: "var(--text-muted)" }}>
+          <p className="text-xs font-semibold mb-3" style={{ color: "var(--text-muted)" }}>
             Transformation Toolbox
           </p>
           <div className="grid grid-cols-2 gap-3 max-w-2xl mb-6">
@@ -598,23 +598,23 @@ export function FeaturePanel({ parsedRows }: FeaturePanelProps) {
                   onClick={() => setActiveTransform(isActive ? null : t.id)}
                   className="rounded-xl border p-4 text-left flex flex-col gap-2.5 transition-all"
                   style={{
-                    borderColor: isActive ? "rgba(16,185,129,0.5)" : "var(--border)",
-                    background: isActive ? "rgba(16,185,129,0.06)" : "var(--bg-secondary)",
-                    outline: isActive ? "1px solid rgba(16,185,129,0.2)" : "none",
+                    borderColor: isActive ? CATEGORY_TEXT[t.category] + "60" : "var(--border)",
+                    background: isActive ? CATEGORY_COLORS[t.category] : "var(--bg-secondary)",
+                    boxShadow: isActive ? `0 0 0 2px ${CATEGORY_TEXT[t.category]}20` : "none",
                   }}
                 >
                   <div className="flex items-start justify-between gap-2">
                     <div
                       className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
                       style={{
-                        background: isActive ? "rgba(16,185,129,0.15)" : CATEGORY_COLORS[t.category],
-                        color: isActive ? "#34d399" : CATEGORY_TEXT[t.category],
+                        background: CATEGORY_COLORS[t.category],
+                        color: CATEGORY_TEXT[t.category],
                       }}
                     >
                       {t.icon}
                     </div>
                     <span
-                      className="text-[9px] font-semibold tracking-widest uppercase px-1.5 py-0.5 rounded mt-0.5"
+                      className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full mt-0.5"
                       style={{
                         background: CATEGORY_COLORS[t.category],
                         color: CATEGORY_TEXT[t.category],
@@ -645,7 +645,7 @@ export function FeaturePanel({ parsedRows }: FeaturePanelProps) {
           <div className="flex-1 min-w-0">
             {activeTransform && selectedCols.size > 0 ? (
               <p className="text-sm font-mono truncate" style={{ color: "var(--text-primary)" }}>
-                <span style={{ color: "#34d399" }}>{selectedCols.size} column{selectedCols.size !== 1 ? "s" : ""}</span>
+                <span style={{ color: "#f59e0b" }}>{selectedCols.size} column{selectedCols.size !== 1 ? "s" : ""}</span>
                 {" "}selected for{" "}
                 <span style={{ color: "var(--text-primary)", fontWeight: 600 }}>
                   {TRANSFORMS.find(t => t.id === activeTransform)?.label}
@@ -668,11 +668,11 @@ export function FeaturePanel({ parsedRows }: FeaturePanelProps) {
             style={{
               background: (!activeTransform || selectedCols.size === 0)
                 ? "var(--surface-active)"
-                : "rgba(16,185,129,0.15)",
-              color: (!activeTransform || selectedCols.size === 0) ? "var(--text-muted)" : "#34d399",
+                : "rgba(245,158,11,0.12)",
+              color: (!activeTransform || selectedCols.size === 0) ? "var(--text-muted)" : "#f59e0b",
               border: (!activeTransform || selectedCols.size === 0)
                 ? "1px solid var(--border)"
-                : "1px solid rgba(16,185,129,0.3)",
+                : "1px solid rgba(245,158,11,0.35)",
               cursor: (!activeTransform || selectedCols.size === 0) ? "not-allowed" : "pointer",
             }}
           >
@@ -700,23 +700,30 @@ export function FeaturePanel({ parsedRows }: FeaturePanelProps) {
           style={{
             height: 160,
             borderTop: "1px solid var(--border)",
-            background: "var(--bg-secondary)",
+            background: "#0d1117",
           }}
         >
           <div
             className="px-3 py-1.5 flex items-center justify-between shrink-0"
-            style={{ borderBottom: "1px solid var(--border)" }}
+            style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}
           >
-            <span className="text-[10px] font-semibold tracking-widest uppercase" style={{ color: "var(--text-muted)" }}>
-              Process Log
-            </span>
+            <div className="flex items-center gap-2">
+              <div className="flex gap-1.5">
+                <span className="w-2.5 h-2.5 rounded-full" style={{ background: "rgba(239,68,68,0.5)" }} />
+                <span className="w-2.5 h-2.5 rounded-full" style={{ background: "rgba(245,158,11,0.5)" }} />
+                <span className="w-2.5 h-2.5 rounded-full" style={{ background: "rgba(52,211,153,0.5)" }} />
+              </div>
+              <span className="text-xs font-semibold" style={{ color: "rgba(255,255,255,0.3)" }}>
+                Process Log
+              </span>
+            </div>
             {logs.length > 0 && (
               <button
                 onClick={() => setLogs([])}
                 className="text-[10px] transition-colors"
-                style={{ color: "var(--text-muted)" }}
-                onMouseEnter={e => (e.currentTarget.style.color = "var(--text-secondary)")}
-                onMouseLeave={e => (e.currentTarget.style.color = "var(--text-muted)")}
+                style={{ color: "rgba(255,255,255,0.3)" }}
+                onMouseEnter={e => (e.currentTarget.style.color = "rgba(255,255,255,0.6)")}
+                onMouseLeave={e => (e.currentTarget.style.color = "rgba(255,255,255,0.3)")}
               >
                 clear
               </button>
@@ -724,13 +731,13 @@ export function FeaturePanel({ parsedRows }: FeaturePanelProps) {
           </div>
           <div className="flex-1 overflow-y-auto px-3 py-2 flex flex-col gap-1">
             {logs.length === 0 ? (
-              <span className="text-xs font-mono" style={{ color: "var(--text-muted)" }}>
-                No activity yet. Apply a transformation to see logs here.
+              <span className="text-xs font-mono" style={{ color: "rgba(255,255,255,0.2)" }}>
+                $ waiting for input — apply a transformation to see output here
               </span>
             ) : (
               logs.map(entry => (
                 <div key={entry.id} className="flex items-start gap-2 font-mono text-xs">
-                  <span className="shrink-0 mt-0.5" style={{ color: "var(--text-muted)" }}>{entry.ts}</span>
+                  <span className="shrink-0 mt-0.5" style={{ color: "rgba(255,255,255,0.25)" }}>{entry.ts}</span>
                   <span className="shrink-0 mt-0.5">
                     <LogIcon level={entry.level} />
                   </span>

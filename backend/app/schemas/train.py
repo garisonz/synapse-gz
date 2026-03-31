@@ -23,6 +23,7 @@ from .upload import Metric
 
 class TrainResponse(BaseModel):
     metrics: list[Metric]
+    confusion_matrix: list[list[int]] | None = None
 
 
 class CompareResponse(BaseModel):
